@@ -3,6 +3,6 @@ This repository contains the documentation and R code of the final course projec
 
 The task was to predict the type of activity based on data from several accelerometers.
 
-The file [`writeup.md`](https://github.com/zanenmw/Practical-Machine-Learning/blob/master/writeup.md) contains a description of the task and the machine-learning process together with the results.
+The file [`Activity.md`](https://github.com/zanenmw/Practical-Machine-Learning/blob/master/Activity.md) contains a description of the task and the machine-learning process together with the results.
 
-The corresponding R commands can be found in the RMarkdown file [`writeup.Rmd`](https://github.com/zanenmw/Practical-Machine-Learning/blob/master/writeup.Rmd).
+The corresponding R commands can be found in the RMarkdown file [`Activity.Rmd`](https://github.com/zanenmw/Practical-Machine-Learning/blob/master/Activity.Rmd).
