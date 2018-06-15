@@ -1,38 +1,36 @@
+Background of the study
+-----------------------
+
+> There is an ever increasing availability of data on physical exercises. The usual analytics are focussed on the amount of exercise which is carried out, but not so much on the effectiveness of the exercises. 
+
 
 The goal of the project
 -----------------------
 
-The goal of the project is to predict the manner in which the physical exercise was done, which is defined by the "classe" variable in the training set. 
-description of the assignment contains the following information on the dataset:
-
-> In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. 
-
-The goal is 
-
-> to predict the manner in which they did the exercise.
+The goal of this project is to predict in what way an exercise was being done.  The participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways (A,B,C,D and E).
 
 
 The training of the model
 -------------------------
 
-In the following, I describe the steps concerning the training of a predictive model.
+In the following steps were executed in order to train the predictive model.
 
 ### Read the data
 
-First, the `.csv` file contain the training data is read into R. Here, unavailable values are set as `NA`.
+First, the `.csv` file contain the training data is read into R, in which unavailable values are set as `NA`.
 
 
 ```r
-rawData <- read.csv("pml-training.csv", na.strings = c("NA", ""))
+pmlTrain <- read.csv2("pml-training.csv", na.strings = c("NA", ""))
 ```
 
 ### Reduce the dataset
 
-In the next step, I check the proportion of missing values (`NA`s) in the columns.
+In the next step the proportion of missing values (`NA`s) is checked in the columns.
 
 
 ```r
-propNAs <- colMeans(is.na(rawData))
+propNAs <- colMeans(is.na(pmlTrain))
 table(propNAs)
 ```
 
@@ -42,7 +40,7 @@ table(propNAs)
 ##                60               100
 ```
 
-There are 100 columns in which almost all values (97.93%) are missing. If a column contains a large number of `NA`s, it will not be of great use for training the model. Hence, these columns will be removed. Only the columns without any `NA`s will be kept.
+There are 100 columns in which almost all values (97.93%) are missing. If a column contains a large number of `NA`s, it will be removed. Only the columns without any `NA`s will be kept.
 
 
 ```r
@@ -58,16 +56,16 @@ sum(idx)
 
 ```r
 # remove these columns  
-rawDataReduced <- rawData[idx]
+pmlTrainReduced <- pmlTrain[idx]
 # check
-ncol(rawDataReduced)
+ncol(pmlTrainReduced)
 ```
 
 ```
 ## [1] 60
 ```
 
-There are further unnecessary columns that can be removed. The column `X` contains the row numbers. The column `user_name` contains the name of the user. Of course, these variables cannot predictors for the type of exercise.
+There are further unnecessary columns that can be removed. The column `ï..Column1` contains the row numbers. The column `user_name` contains the name of the user. Both variables cannot be predictors for the type of exercise.
 
 Furthermore, the three columns containing time stamps (`raw_timestamp_part_1`, `raw_timestamp_part_2`, and `cvtd_timestamp`) will not be used.
 
@@ -76,7 +74,7 @@ The factors `new_window` and `num_window` are not related to sensor data. They w
 
 ```r
 # find columns not containing sensor measurement data
-idx <- grep("^X$|user_name|timestamp|window", names(rawDataReduced))
+idx <- grep("^ï..Column1$|user_name|timestamp|window", names(pmlTrainReduced))
 # check
 length(idx)
 ```
@@ -87,7 +85,7 @@ length(idx)
 
 ```r
 # remove columns
-rawDataReduced2 <- rawDataReduced[-idx]
+pmlTrainReduced2 <- pmlTrainReduced[-idx]
 ```
 
 
@@ -101,14 +99,14 @@ library(caret)
 ```
 
 ```r
-inTrain <- createDataPartition(y = rawDataReduced2$classe, p = 0.7, list = FALSE)
+inTrain <- createDataPartition(y = pmlTrainReduced2$classe, p = 0.7, list = FALSE)
 ```
 
 The index `inTrain` is used to split the data.
 
 
 ```r
-training <- rawDataReduced2[inTrain, ]
+training <- pmlTrainReduced2[inTrain, ]
 # the number of columns on the training set
 nrow(training)
 ```
@@ -118,7 +116,7 @@ nrow(training)
 ```
 
 ```r
-crossval <- rawDataReduced2[-inTrain, ]
+crossval <- pmlTrainReduced2[-inTrain, ]
 # the number of rows in the cross-validation set
 nrow(crossval)
 ```
@@ -130,11 +128,7 @@ nrow(crossval)
 
 ### Train a model
 
-I used the *random-forest* technique to generate a predictive model. In sum, 10 models were trained. I played around with the parameters passed to `trControl` and specified different models with bootstrapping (`method = "boot"`) and cross-validation (`method = "cv"`).
-
-It took more than one day to train all models. Afterwards I tested their performance on the cross-validation dataset. It turned out that all models showed a good performance (because their accuracy was above 99%) though their training times were quite different.
-
-Due to the similar performance, I will present the model with the shortest training time.
+A *random-forest* technique generates a predictive model. In sum, 10 models were trained. 
 
 
 ```r
@@ -167,10 +161,10 @@ acc
 
 ```
 ##  Accuracy 
-## 0.9923534
+## 9916737
 ```
 
-The accuracy of the prediction is 99.24%. Hence, the *out-of-sample error* is 0.76%.
+The accuracy of the prediction is 99.17%. Hence, the *out-of-sample error* is 0.83%.
 
 
 ### Variable importance
@@ -186,16 +180,17 @@ vi[head(order(unlist(vi), decreasing = TRUE), 5L), , drop = FALSE]
 ```
 ##                     Overall
 ## roll_belt         100.00000
-## pitch_forearm      60.51577
-## yaw_belt           51.70924
-## magnet_dumbbell_y  46.05269
-## magnet_dumbbell_z  44.17784
+## magnet_dumbbell_z  93.63891
+## yaw_belt           84.66317
+## magnet_dumbbell_y  82.31206
+## roll_forearm       69.45428
 ```
 
 ***************************************************************************
 
 #### The source of the data
 
-The assignment is based on data of weight lifting exercises. It has been published:
+For this study the data is used from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. It has been published:
 
 Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/har#ixzz34irPKNuZ). *Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13)*. Stuttgart, Germany: ACM SIGCHI, 2013.
+The data for this project come from this source: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har.
